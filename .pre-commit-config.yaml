@@ -7,7 +7,4 @@ repos:
       - id: check-added-large-files
       - id: check-yaml
       - id: end-of-file-fixer
-      - id: name-tests-test
-        exclude: tests/mocks/*
-      - id: requirements-txt-fixer
       - id: trailing-whitespace
