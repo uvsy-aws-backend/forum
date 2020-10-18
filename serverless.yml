@@ -1,0 +1,56 @@
+service: forum
+
+provider:
+  name: aws
+  runtime: java8
+  profile: ${opt:profile, 'uvsy-dev'}
+  stage: ${opt:stage, 'dev2'}
+  region: ${opt:region, 'sa-east-1'}
+  timeout: 30
+  deploymentBucket: ${self:provider.stage}.${self:provider.region}.universy.serverless.deploys
+  deploymentPrefix: ${self:provider.region}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource: "*"
+  environment:
+    STAGE: ${self:provider.stage}
+
+plugins:
+  - serverless-offline
+  - serverless-domain-manager
+  - serverless-prune-plugin
+
+package:
+  artifact: build/distributions/${self:service}-1.0.zip
+
+
+custom:
+
+  # Domain name configuration
+  customDomain:
+    domainName: forum-api-${self:provider.stage}.compute.universy.app
+    stage: ${self:provider.stage}
+    endpointType: "regional"
+    hostedZoneId: ${ssm:/all/route53/zones/compute/id~true}
+    certificateArn: ${ssm:/all/acm/cert/compute/arn~true}
+    createRoute53Record: true
+    apiType: REST
+
+  # Database Configuration
+  dbDriver: jdbc
+  dbProtocol: postgresql
+  dbPort: 5432
+  dbName: ${self:provider.stage}-forum
+  dbHost: ${ssm:/${self:provider.stage}/database/host~true}
+  dbUser: ${ssm:/${self:provider.stage}/database/user~true}
+  dbPassword: ${ssm:/${self:provider.stage}/database/password~true}
+
+  # Prune
+  prune:
+    automatic: true
+    number: 3
+
+functions:
+  - ${file(./sls/functions/api.yml)}

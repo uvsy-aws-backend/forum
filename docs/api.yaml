@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  description: API publications, votes and comments
+  version: 0.0.1
+  title: ForumAPI
+tags:
+  - name: publications
+    description: Manage publications information
+servers:
+  - url: https://forum-api-{stage}.compute.universy.app/v1
+    variables:
+      stage:
+        default: dev2
+        enum:
+          - dev2
+paths:
+  /publications:
+    get:
+      tags:
+        - publications
+      summary: Get  all publications
+      responses:
+        200:
+          description: Sucess
+      operationId: getPublications

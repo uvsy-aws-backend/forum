@@ -1,0 +1,156 @@
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath group: 'com.amazonaws', name: 'aws-java-sdk-ssm', version: '1.11.789'
+        classpath "com.avast.gradle:gradle-docker-compose-plugin:0.12.1"
+        classpath group: 'org.postgresql', name: 'postgresql', version: '42.2.12'
+    }
+}
+
+plugins {
+    id "org.flywaydb.flyway" version "6.1.4"
+}
+
+apply plugin: 'java'
+apply plugin: 'docker-compose'
+
+
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+
+
+group 'app.universy'
+version '1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+def STAGE = System.getenv("AWS_STAGE") ?: "local"
+def DB_DRIVER = "jdbc"
+def DB_PROTOCOL = "postgresql"
+def DB_HOST = STAGE == "local" ? "localhost" : fetchSSM("/${STAGE}/database/host")
+def DB_PORT = "5432"
+def DB_NAME = "${STAGE}-forum"
+def DB_USERNAME = STAGE == "local" ? "username" : fetchSSM("/${STAGE}/database/user")
+def DB_PASSWORD = STAGE == "local" ? "password" : fetchSSM("/${STAGE}/database/password")
+def DB_URL = "${DB_DRIVER}:${DB_PROTOCOL}://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
+dependencies {
+    implementation 'org.jetbrains:annotations:19.0.0'
+
+
+    // Logging
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+
+    // Databases
+    compile group: 'org.postgresql', name: 'postgresql', version: postgresqlVersion
+    compile group: 'com.j256.ormlite', name: 'ormlite-jdbc', version: ormliteVersion
+
+    // Lombok
+    compile group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+
+    // Serverless API
+    compile "com.github.GonzaloSaad:java-serverless-api:${serverlessAPIVersion}"
+
+
+}
+
+task ssm {
+    doLast {
+        print(DB_PASSWORD)
+    }
+}
+
+static def fetchSSM(String paramName) {
+    def request = new GetParameterRequest().withName(paramName)
+    def client = AWSSimpleSystemsManagementClientBuilder.standard()
+            .withRegion("sa-east-1")
+            .withCredentials(new ProfileCredentialsProvider("uvsy-dev"))
+            .build()
+    def response = client.getParameter(request)
+    return response.getParameter().getValue()
+}
+
+jar {
+    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+
+    manifest {
+    }
+}
+
+task copyClassesToLocalRunFolder(type: Copy) {
+    from(sourceSets.main.output) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    into buildDir.path + "/run"
+}
+
+task copyDependenciesToLocalRunFolder(type: Copy) {
+    from(configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    into buildDir.path + "/run"
+}
+
+
+task buildForLocalRun {
+    doLast{
+        println "Built for local run under build/run"
+    }
+}
+
+buildForLocalRun.dependsOn build
+buildForLocalRun.dependsOn copyDependenciesToLocalRunFolder
+buildForLocalRun.dependsOn copyClassesToLocalRunFolder
+
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtime
+    }
+}
+
+build.dependsOn buildZip
+
+dockerCompose {
+    useComposeFiles = ['docker-compose.yml']
+    startedServices = ['postgres-forum']
+    forceRecreate = true
+    environment.put 'POSTGRES_DB', DB_NAME
+    environment.put 'POSTGRES_USER', DB_USERNAME
+    environment.put 'POSTGRES_PASSWORD', DB_PASSWORD
+}
+
+flyway {
+    url = DB_URL
+    user = DB_USERNAME
+    password = DB_PASSWORD
+    locations = ["filesystem:sql"]
+    placeholders = [
+            'DATABASE.NAME': DB_NAME
+    ]
+}
+
+build.dependsOn buildZip

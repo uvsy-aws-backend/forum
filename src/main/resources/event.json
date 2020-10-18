@@ -1,0 +1,138 @@
+{
+  "resource": "/institutions",
+  "path": "/institutions/",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    "cache-control": "no-cache",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "AR",
+    "Host": "ylqslutim0.execute-api.sa-east-1.amazonaws.com",
+    "postman-token": "44ea5c46-9dc8-daf3-c26c-f1ea94325cce",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "none",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36",
+    "Via": "2.0 05a4a9640af10258c45819b63c421392.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "VWjFFNOnxUAeLzbiOLS948kJJ3qW4yd5QR_o7Ntr0cBFshLUYWmx9w==",
+    "X-Amzn-Trace-Id": "Root=1-5ee18704-68e09086f12c21a0feea9afe",
+    "x-api-key": "xDFnSvDaNd6GJLLx6b8VG9kBYTE7dFOv8PY5reQ7",
+    "X-Forwarded-For": "181.31.92.154, 130.176.27.137",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Accept-Language": [
+      "es-ES,es;q=0.9,en;q=0.8"
+    ],
+    "cache-control": [
+      "no-cache"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "CloudFront-Viewer-Country": [
+      "AR"
+    ],
+    "Host": [
+      "ylqslutim0.execute-api.sa-east-1.amazonaws.com"
+    ],
+    "postman-token": [
+      "44ea5c46-9dc8-daf3-c26c-f1ea94325cce"
+    ],
+    "sec-fetch-dest": [
+      "empty"
+    ],
+    "sec-fetch-mode": [
+      "cors"
+    ],
+    "sec-fetch-site": [
+      "none"
+    ],
+    "User-Agent": [
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
+    ],
+    "Via": [
+      "2.0 05a4a9640af10258c45819b63c421392.cloudfront.net (CloudFront)"
+    ],
+    "X-Amz-Cf-Id": [
+      "VWjFFNOnxUAeLzbiOLS948kJJ3qW4yd5QR_o7Ntr0cBFshLUYWmx9w=="
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-5ee18704-68e09086f12c21a0feea9afe"
+    ],
+    "x-api-key": [
+      "xDFnSvDaNd6GJLLx6b8VG9kBYTE7dFOv8PY5reQ7"
+    ],
+    "X-Forwarded-For": [
+      "181.31.92.154, 130.176.27.137"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "mgaqrs",
+    "resourcePath": "/institutions",
+    "httpMethod": "GET",
+    "extendedRequestId": "N8IItGjeGjQFXVA=",
+    "requestTime": "11/Jun/2020:01:21:08 +0000",
+    "path": "/dev2/institutions/",
+    "accountId": "952339477220",
+    "protocol": "HTTP/1.1",
+    "stage": "dev2",
+    "domainPrefix": "ylqslutim0",
+    "requestTimeEpoch": 1591838468411,
+    "requestId": "287e3c92-841d-4e32-942a-e71206c6adad",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "cognitoIdentityId": null,
+      "apiKey": "xDFnSvDaNd6GJLLx6b8VG9kBYTE7dFOv8PY5reQ7",
+      "principalOrgId": null,
+      "cognitoAuthenticationType": null,
+      "userArn": null,
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36",
+      "accountId": null,
+      "caller": null,
+      "sourceIp": "181.31.92.154",
+      "accessKey": null,
+      "cognitoAuthenticationProvider": null,
+      "user": null
+    },
+    "domainName": "ylqslutim0.execute-api.sa-east-1.amazonaws.com",
+    "apiId": "ylqslutim0"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}
