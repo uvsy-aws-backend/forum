@@ -1,4 +1,4 @@
-package app.uvsy.model;
+package app.uvsy.model.db;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Data
 @DatabaseTable(tableName = "tag")
-public class Tag {
+public class TagDB {
 
     public static final String DESCRIPTION_FIELD = "description";
 
@@ -26,10 +26,10 @@ public class Tag {
     private Timestamp updatedAt;
 
 
-    public Tag() {
+    public TagDB() {
     }
 
-    public Tag(String id, String description) {
+    public TagDB(String id, String description) {
         this.id = id;
         this.description = description;
     }

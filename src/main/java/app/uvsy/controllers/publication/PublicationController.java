@@ -34,12 +34,13 @@ public class PublicationController {
 
     @Handler(method = HttpMethod.GET, resource = "/v1/publications")
     public PaginatedResponse getPublications(@QueryParameter(name = "programId", required = false) String programId,
-                                    @QueryParameter(name = "limit",required = false) Integer limit,
-                                    @QueryParameter(name = "offset", required = false) Integer offset,
-                                    @QueryParameter(name = "tags", required = false) List<String> tags,
-                                    @QueryParameter(name = "tagsOperator", required = false) String tagsOperator,
-                                    @QueryParameter(name = "sort",required = false) List<String> sortBy,
-    @QueryParameter(name = "includeTags", required = false) Boolean includeTags) {
+                                             @QueryParameter(name = "limit", required = false) Integer limit,
+                                             @QueryParameter(name = "offset", required = false) Integer offset,
+                                             @QueryParameter(name = "tags", required = false) List<String> tags,
+                                             @QueryParameter(name = "tagsOperator", required = false) String tagsOperator,
+                                             @QueryParameter(name = "sort", required = false) List<String> sortBy,
+                                             @QueryParameter(name = "includeTags", required = false) Boolean includeTags,
+                                             @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
         return PaginatedResponse.of(publicationService.getPublications(
                 Optional.ofNullable(programId).orElse(""),
                 Optional.ofNullable(limit).orElse(10),
@@ -47,7 +48,8 @@ public class PublicationController {
                 Optional.ofNullable(tags).orElse(Collections.emptyList()),
                 Optional.ofNullable(tagsOperator).orElse("OR"),
                 Optional.ofNullable(sortBy).orElse(Collections.emptyList()),
-                Optional.ofNullable(includeTags).orElse(Boolean.FALSE)
+                Optional.ofNullable(includeTags).orElse(Boolean.FALSE),
+                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE)
         ));
     }
 
