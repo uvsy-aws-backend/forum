@@ -1,44 +1,40 @@
 package app.uvsy.model;
 
+import app.uvsy.model.db.PublicationDB;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-
-@Data
-@DatabaseTable(tableName = "publication")
+@Getter
+@Setter
+@ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Publication {
-
-    public static final String PROGRAM_ID_FIELD = "program_id";
-
-    @DatabaseField(columnName = "id", id = true)
     private String id;
-
-    @DatabaseField(columnName = "title")
     private String title;
-
-    @DatabaseField(columnName = "description")
     private String description;
-
-    @DatabaseField(columnName = "user_id")
     private String userId;
-
-    @DatabaseField(columnName = "program_id")
+    private String userAlias;
     private String programId;
-
-    @DatabaseField(columnName = "votes")
     private Integer votes;
-
-    @DatabaseField(columnName = "created_at", readOnly = true)
     private Timestamp createdAt;
-
-    @DatabaseField(columnName = "updated_at", readOnly = true)
     private Timestamp updatedAt;
-
     private List<String> tags;
+
+    public static Publication from(PublicationDB publicationDB) {
+        Publication p = new Publication();
+        p.setId(publicationDB.getId());
+        p.setTitle(publicationDB.getTitle());
+        p.setDescription(publicationDB.getDescription());
+        p.setUserId(publicationDB.getUserId());
+        p.setProgramId(publicationDB.getProgramId());
+        p.setVotes(publicationDB.getVotes());
+        p.setCreatedAt(publicationDB.getCreatedAt());
+        p.setUpdatedAt(publicationDB.getUpdatedAt());
+        return p;
+    }
 }

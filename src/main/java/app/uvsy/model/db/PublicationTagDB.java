@@ -1,4 +1,4 @@
-package app.uvsy.model;
+package app.uvsy.model.db;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Data
 @DatabaseTable(tableName = "publicationtag")
-public class PublicationTag {
+public class PublicationTagDB {
 
     public static final String PUBLICATION_ID_FIELD = "publication_id";
 
@@ -24,10 +24,10 @@ public class PublicationTag {
     private String publicationId;
 
     @DatabaseField(foreign = true, foreignColumnName = "id", columnName = "publication_id", readOnly = true)
-    private Publication publication;
+    private PublicationDB publication;
 
     @DatabaseField(foreign = true, foreignColumnName = "id", columnName = "tag_id", readOnly = true)
-    private Tag tag;
+    private TagDB tag;
 
     @DatabaseField(columnName = "created_at", readOnly = true)
     private Timestamp createdAt;
@@ -36,10 +36,10 @@ public class PublicationTag {
     private Timestamp updatedAt;
 
 
-    public PublicationTag() {
+    public PublicationTagDB() {
     }
 
-    public PublicationTag(String tagId, String publicationId) {
+    public PublicationTagDB(String tagId, String publicationId) {
         this.tagId = tagId;
         this.publicationId = publicationId;
     }

@@ -65,6 +65,8 @@ dependencies {
     // Serverless API
     compile "com.github.GonzaloSaad:java-serverless-api:${serverlessAPIVersion}"
 
+    // Http
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpComponentsVersion
 
 }
 
