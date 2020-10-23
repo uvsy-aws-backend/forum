@@ -1,7 +1,6 @@
-package app.uvsy.controllers.publication;
+package app.uvsy.controllers.publication.comment;
 
 import app.uvsy.controllers.publication.payload.CreateCommentPayload;
-import app.uvsy.controllers.publication.payload.CreatePublicationPayload;
 import app.uvsy.response.PaginatedResponse;
 import app.uvsy.response.Response;
 import app.uvsy.service.PublicationService;
@@ -16,16 +15,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class PublicationController {
+public class CommentController {
 
     private final PublicationService publicationService;
 
-    public PublicationController() {
+    public CommentController() {
         this.publicationService = new PublicationService();
     }
 
-    public PublicationController(PublicationService publicationService) {
+    public CommentController(PublicationService publicationService) {
         this.publicationService = publicationService;
+    }
+
+/*    @Handler(method = HttpMethod.GET, resource = "/v1/publications/{id}")
+    public Response getPublication(@PathParameter(name = "id") String publicationId) {
+        return Response.of(publicationService.getPublication(publicationId));
     }
 
     @Handler(method = HttpMethod.GET, resource = "/v1/publications")
@@ -34,7 +38,7 @@ public class PublicationController {
                                              @QueryParameter(name = "offset", required = false) Integer offset,
                                              @QueryParameter(name = "tags", required = false) List<String> tags,
                                              @QueryParameter(name = "tagsOperator", required = false) String tagsOperator,
-                                             @QueryParameter(name = "sortBy", required = false) List<String> sortBy,
+                                             @QueryParameter(name = "sort", required = false) List<String> sortBy,
                                              @QueryParameter(name = "includeTags", required = false) Boolean includeTags,
                                              @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
         return PaginatedResponse.of(publicationService.getPublications(
@@ -50,7 +54,7 @@ public class PublicationController {
     }
 
     @Handler(method = HttpMethod.POST, resource = "/v1/publications")
-    public void createPublication(@BodyParameter CreatePublicationPayload payload) {
+    public void createPublication(@BodyParameter CreateCommentPayload payload) {
         publicationService.createPublication(
                 payload.getTitle(),
                 payload.getDescription(),
@@ -58,40 +62,6 @@ public class PublicationController {
                 payload.getUserId(),
                 Optional.ofNullable(payload.getTags()).orElseGet(ArrayList::new)
         );
-    }
+    }*/
 
-    @Handler(method = HttpMethod.GET, resource = "/v1/publications/{id}")
-    public Response getPublication(@PathParameter(name = "id") String publicationId) {
-        return Response.of(publicationService.getPublication(publicationId));
-    }
-
-    @Handler(method = HttpMethod.DELETE, resource = "/v1/publications/{id}")
-    public void deletePublication(@PathParameter(name = "id") String publicationId) {
-        publicationService.deletePublication(publicationId);
-    }
-
-    @Handler(method = HttpMethod.POST, resource = "/v1/publications/{id}/comments")
-    public void createComment(@PathParameter(name = "id") String publicationId,
-                              @BodyParameter CreateCommentPayload payload) {
-        publicationService.createComment(
-                publicationId,
-                payload.getUserId(),
-                payload.getContent()
-        );
-    }
-
-    @Handler(method = HttpMethod.GET, resource = "/v1/publications/{id}/comments")
-    public PaginatedResponse getComments(@PathParameter(name = "id") String publicationId,
-                                         @QueryParameter(name = "limit", required = false) Integer limit,
-                                         @QueryParameter(name = "offset", required = false) Integer offset,
-                                         @QueryParameter(name = "sort", required = false) List<String> sortBy,
-                                         @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
-        return PaginatedResponse.of(publicationService.getComments(
-                publicationId,
-                Optional.ofNullable(limit).orElse(10),
-                Optional.ofNullable(offset).orElse(0),
-                Optional.ofNullable(sortBy).orElse(Collections.emptyList()),
-                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE)
-        ));
-    }
 }

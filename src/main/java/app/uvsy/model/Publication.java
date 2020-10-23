@@ -21,6 +21,7 @@ public class Publication {
     private String userAlias;
     private String programId;
     private Integer votes;
+    private Long comments;
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private List<String> tags;
