@@ -17,6 +17,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 
@@ -125,11 +126,21 @@ public class PublicationService {
         try (ConnectionSource conn = DBConnection.create()) {
 
             Dao<PublicationDB, String> publicationsDao = DaoManager.createDao(conn, PublicationDB.class);
+            Dao<PublicationTagDB, String> publicationTagDAO = DaoManager.createDao(conn, PublicationTagDB.class);
             Dao<CommentDB, String> commentsDao = DaoManager.createDao(conn, CommentDB.class);
 
+
+            DeleteBuilder<CommentDB, String> commentDelete = commentsDao.deleteBuilder();
+            commentDelete.where().eq(CommentDB.PUBLICATION_ID_FIELD, publicationId);
+
+
+            DeleteBuilder<PublicationTagDB, String> publicationTagDelete = publicationTagDAO.deleteBuilder();
+            publicationTagDelete.where().eq(PublicationTagDB.PUBLICATION_ID_FIELD, publicationId);
+
             TransactionManager.callInTransaction(conn, () -> {
+                commentDelete.delete();
+                publicationTagDelete.delete();
                 publicationsDao.deleteById(publicationId);
-                commentsDao.deleteBuilder().where().eq(CommentDB.PUBLICATION_ID_FIELD, publicationId);
                 return null; // Required by the interface
             });
 
