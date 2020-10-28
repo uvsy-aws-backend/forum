@@ -6,7 +6,6 @@ import app.uvsy.apis.students.model.UserAlias;
 import app.uvsy.database.DBConnection;
 import app.uvsy.database.exceptions.DBException;
 import app.uvsy.environment.Environment;
-import app.uvsy.model.Comment;
 import app.uvsy.model.Publication;
 import app.uvsy.model.db.CommentDB;
 import app.uvsy.model.db.PublicationDB;
@@ -29,23 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PublicationService {
-
-
-    public Publication getPublication(String publicationId) {
-        try (ConnectionSource conn = DBConnection.create()) {
-            Dao<PublicationDB, String> publicationsDao = DaoManager.createDao(conn, PublicationDB.class);
-            return Optional.ofNullable(publicationsDao.queryForId(publicationId))
-                    .map(Publication::from)
-                    .orElseThrow(() -> new RecordNotFoundException(publicationId));
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-            throw new DBException(e);
-        }
-    }
 
     public List<Publication> getPublications(String programId, Integer limit, Integer offset,
                                              List<String> tags, String tagOperator, List<String> sortBy,
@@ -73,7 +60,7 @@ public class PublicationService {
                 );
             }
 
-            if (!publications.isEmpty()){
+            if (!publications.isEmpty()) {
                 Map<String, Long> commentCount = getCommentCount(conn, publications);
                 publications.forEach(
                         p -> p.setComments(commentCount.getOrDefault(p.getId(), 0L))
@@ -87,7 +74,7 @@ public class PublicationService {
         }
 
         if (!publications.isEmpty() && includeAlias) {
-            Map<String, String> publicationsAlias = getAliasFromPublications(publications);
+            Map<String, String> publicationsAlias = getAlias(publications);
             publications = publications
                     .stream()
                     .peek(p -> p.setUserAlias(publicationsAlias.get(p.getUserId())))
@@ -95,6 +82,41 @@ public class PublicationService {
                     .collect(Collectors.toList());
         }
         return publications;
+    }
+
+    public Publication getPublication(String publicationId) {
+        try (ConnectionSource conn = DBConnection.create()) {
+            Dao<PublicationDB, String> publicationsDao = DaoManager.createDao(conn, PublicationDB.class);
+            return Optional.ofNullable(publicationsDao.queryForId(publicationId))
+                    .map(Publication::from)
+                    .orElseThrow(() -> new RecordNotFoundException(publicationId));
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+            throw new DBException(e);
+        }
+    }
+
+
+    public void updatePublication(String publicationId, String title, String description, List<String> tags) {
+        try (ConnectionSource conn = DBConnection.create()) {
+            Dao<PublicationDB, String> publicationsDao = DaoManager.createDao(conn, PublicationDB.class);
+            PublicationDB publicationDB = Optional.ofNullable(publicationsDao.queryForId(publicationId))
+                    .orElseThrow(() -> new RecordNotFoundException(publicationId));
+
+            publicationDB.setTitle(title);
+            publicationDB.setDescription(description);
+
+            TransactionManager.callInTransaction(conn, () -> {
+                publicationsDao.update(publicationDB);
+                removeTags(conn, publicationDB, tags);
+                insertTags(conn, publicationDB, tags);
+                return null;
+            });
+
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+            throw new DBException(e);
+        }
     }
 
     public void createPublication(String title, String description, String programId, String userId, List<String> tags) {
@@ -114,7 +136,7 @@ public class PublicationService {
             publicationsDao.create(publication);
 
             if (!tags.isEmpty()) {
-                insertTags(tags, conn, publication);
+                insertTags(conn, publication, tags);
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
@@ -145,59 +167,6 @@ public class PublicationService {
             });
 
 
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-            throw new DBException(e);
-        }
-    }
-
-    public void createComment(String publicationId, String userId, String content) {
-
-        try (ConnectionSource conn = DBConnection.create()) {
-
-            if (publicationExists(conn, publicationId)) {
-                Dao<CommentDB, String> commentDao = DaoManager.createDao(conn, CommentDB.class);
-
-                CommentDB commentDB = new CommentDB();
-                commentDB.setPublicationId(publicationId);
-                commentDB.setUserId(userId);
-                commentDB.setContent(content);
-                commentDB.setVotes(0);
-                commentDao.create(commentDB);
-            } else {
-                throw new RecordNotFoundException(publicationId);
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-            throw new DBException(e);
-        }
-    }
-
-    public List<Comment> getComments(String publicationId, Integer limit, Integer offset,
-                                     List<String> sortBy, Boolean includeAlias) {
-        try (ConnectionSource conn = DBConnection.create()) {
-
-            if (publicationExists(conn, publicationId)) {
-                QueryBuilder<CommentDB, String> commentQuery = getCommentQuery(conn, publicationId,
-                        limit, offset, sortBy);
-
-                List<Comment> comments = commentQuery.query()
-                        .stream()
-                        .map(Comment::from)
-                        .collect(Collectors.toList());
-
-                if (!comments.isEmpty() && includeAlias) {
-                    Map<String, String> publicationsAlias = getAliasFromComments(comments);
-                    comments = comments
-                            .stream()
-                            .peek(p -> p.setUserAlias(publicationsAlias.get(p.getUserId())))
-                            .filter(p -> Objects.nonNull(p.getUserAlias()))
-                            .collect(Collectors.toList());
-                }
-                return comments;
-            } else {
-                throw new RecordNotFoundException(publicationId);
-            }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
             throw new DBException(e);
@@ -265,12 +234,30 @@ public class PublicationService {
                 ));
     }
 
-    private void insertTags(List<String> tags, ConnectionSource conn, PublicationDB publication) throws SQLException {
-        // Get Existing tag
+    private void insertTags(ConnectionSource conn, PublicationDB publication, List<String> tags) throws SQLException {
+        // Create tags
+        Set<TagDB> tagsSet = createTags(conn, tags);
+
+        Dao<PublicationTagDB, String> publicationTagsDao = DaoManager.createDao(conn, PublicationTagDB.class);
+
+        // Delete Publication Tags
+        DeleteBuilder<PublicationTagDB, String> deleteBuilder = publicationTagsDao.deleteBuilder();
+        deleteBuilder.where().eq(PublicationTagDB.PUBLICATION_ID_FIELD, publication.getId());
+        deleteBuilder.delete();
+
+        // Create Publication Tags
+        publicationTagsDao.create(
+                tagsSet.stream()
+                        .map(t -> new PublicationTagDB(t.getId(), publication.getId()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private Set<TagDB> createTags(ConnectionSource conn, List<String> tags) throws SQLException {
         Dao<TagDB, String> tagsDao = DaoManager.createDao(conn, TagDB.class);
         List<TagDB> existingTagDBS = tagsDao.queryBuilder()
                 .where()
-                .eq(TagDB.DESCRIPTION_FIELD, tags)
+                .in(TagDB.DESCRIPTION_FIELD, tags)
                 .query();
 
         // Create non existing tags
@@ -286,16 +273,29 @@ public class PublicationService {
 
         tagsDao.create(newTagDBS);
 
+        Set<TagDB> totalTags = new HashSet<>(existingTagDBS);
+        totalTags.addAll(newTagDBS);
+        return totalTags;
+    }
 
-        // Associate publication with tags
-        List<TagDB> totalTagDBS = new ArrayList<>();
-        totalTagDBS.addAll(newTagDBS);
-        totalTagDBS.addAll(existingTagDBS);
+    private void removeTags(ConnectionSource conn, PublicationDB publication, List<String> tags) throws SQLException {
 
+        // Create a set to avoid duplicates
+        HashSet<String> tagsSet = new HashSet<>(tags);
+
+        // Instantiate DAO
         Dao<PublicationTagDB, String> publicationTagsDao = DaoManager.createDao(conn, PublicationTagDB.class);
-        publicationTagsDao.create(
-                totalTagDBS.stream()
-                        .map(t -> new PublicationTagDB(t.getId(), publication.getId()))
+
+        // Fetch publications tags
+        List<PublicationTagDB> publicationTagDBS = publicationTagsDao.queryBuilder()
+                .where()
+                .eq(PublicationTagDB.PUBLICATION_ID_FIELD, publication.getId())
+                .query();
+
+        // Remove non-existing ones
+        publicationTagsDao.delete(
+                publicationTagDBS.stream()
+                        .filter(t -> !tagsSet.contains(t.getTag().getDescription()))
                         .collect(Collectors.toList())
         );
     }
@@ -313,27 +313,6 @@ public class PublicationService {
         QueryBuilder<PublicationTagDB, String> publicationTagQuery = pTagDao.queryBuilder();
         publicationTagQuery.join(tagsQuery);
         return publicationTagQuery;
-    }
-
-    private QueryBuilder<CommentDB, String> getCommentQuery(ConnectionSource conn, String publicationId, Integer limit, Integer offset, List<String> sortBy) throws SQLException {
-        Dao<CommentDB, String> commentDao = DaoManager.createDao(conn, CommentDB.class);
-
-        QueryBuilder<CommentDB, String> commentQuery = commentDao.queryBuilder();
-
-        commentQuery.where().eq(CommentDB.PUBLICATION_ID_FIELD, publicationId);
-
-        // Pagination
-        if (limit > 0) commentQuery.limit(limit.longValue());
-        if (offset > 0) commentQuery.offset(offset.longValue());
-
-        // Sorting
-        sortBy.forEach((s -> commentQuery.orderBy(s, true)));
-        return commentQuery;
-    }
-
-    private boolean publicationExists(ConnectionSource conn, String publicationId) throws SQLException {
-        Dao<PublicationDB, String> publicationsDao = DaoManager.createDao(conn, PublicationDB.class);
-        return Optional.ofNullable(publicationsDao.queryForId(publicationId)).isPresent();
     }
 
     private Map<String, Long> getCommentCount(ConnectionSource conn, List<Publication> publications) throws SQLException {
@@ -362,10 +341,13 @@ public class PublicationService {
     }
 
     // Alias
-    private Map<String, String> getAlias(List<String> userIds) throws APIClientException {
+    private Map<String, String> getAlias(List<Publication> publications) throws APIClientException {
         StudentsAPI studentsAPI = new StudentsAPI(Environment.getStage());
         return studentsAPI
-                .postAliasQuery(userIds)
+                .postAliasQuery(publications.stream()
+                        .map(Publication::getUserId)
+                        .distinct()
+                        .collect(Collectors.toList()))
                 .stream()
                 .collect(
                         Collectors.toMap(
@@ -373,21 +355,5 @@ public class PublicationService {
                                 UserAlias::getAlias
                         )
                 );
-    }
-
-    private Map<String, String> getAliasFromPublications(List<Publication> publications) throws APIClientException {
-        return getAlias(publications.stream()
-                .map(Publication::getUserId)
-                .distinct()
-                .collect(Collectors.toList())
-        );
-    }
-
-    private Map<String, String> getAliasFromComments(List<Comment> comments) throws APIClientException {
-        return getAlias(comments.stream()
-                .map(Comment::getUserId)
-                .distinct()
-                .collect(Collectors.toList())
-        );
     }
 }

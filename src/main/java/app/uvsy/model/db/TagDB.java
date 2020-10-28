@@ -5,6 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 
 @Data
@@ -34,5 +35,17 @@ public class TagDB {
         this.description = description;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TagDB tagDB = (TagDB) o;
+        return Objects.equals(id, tagDB.id) &&
+                Objects.equals(description, tagDB.description);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, description);
+    }
 }

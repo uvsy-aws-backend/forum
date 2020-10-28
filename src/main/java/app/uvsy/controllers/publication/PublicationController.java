@@ -1,7 +1,7 @@
 package app.uvsy.controllers.publication;
 
-import app.uvsy.controllers.publication.payload.CreateCommentPayload;
 import app.uvsy.controllers.publication.payload.CreatePublicationPayload;
+import app.uvsy.controllers.publication.payload.UpdatePublicationPayload;
 import app.uvsy.response.PaginatedResponse;
 import app.uvsy.response.Response;
 import app.uvsy.service.PublicationService;
@@ -65,33 +65,19 @@ public class PublicationController {
         return Response.of(publicationService.getPublication(publicationId));
     }
 
-    @Handler(method = HttpMethod.DELETE, resource = "/v1/publications/{id}")
-    public void deletePublication(@PathParameter(name = "id") String publicationId) {
-        publicationService.deletePublication(publicationId);
-    }
-
-    @Handler(method = HttpMethod.POST, resource = "/v1/publications/{id}/comments")
-    public void createComment(@PathParameter(name = "id") String publicationId,
-                              @BodyParameter CreateCommentPayload payload) {
-        publicationService.createComment(
+    @Handler(method = HttpMethod.PUT, resource = "/v1/publications/{id}")
+    public void updatePublication(@PathParameter(name = "id") String publicationId,
+                                  @BodyParameter UpdatePublicationPayload payload) {
+        publicationService.updatePublication(
                 publicationId,
-                payload.getUserId(),
-                payload.getContent()
+                payload.getTitle(),
+                payload.getDescription(),
+                payload.getTags()
         );
     }
 
-    @Handler(method = HttpMethod.GET, resource = "/v1/publications/{id}/comments")
-    public PaginatedResponse getComments(@PathParameter(name = "id") String publicationId,
-                                         @QueryParameter(name = "limit", required = false) Integer limit,
-                                         @QueryParameter(name = "offset", required = false) Integer offset,
-                                         @QueryParameter(name = "sort", required = false) List<String> sortBy,
-                                         @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
-        return PaginatedResponse.of(publicationService.getComments(
-                publicationId,
-                Optional.ofNullable(limit).orElse(10),
-                Optional.ofNullable(offset).orElse(0),
-                Optional.ofNullable(sortBy).orElse(Collections.emptyList()),
-                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE)
-        ));
+    @Handler(method = HttpMethod.DELETE, resource = "/v1/publications/{id}")
+    public void deletePublication(@PathParameter(name = "id") String publicationId) {
+        publicationService.deletePublication(publicationId);
     }
 }
