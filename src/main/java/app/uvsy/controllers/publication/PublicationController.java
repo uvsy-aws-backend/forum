@@ -1,6 +1,7 @@
 package app.uvsy.controllers.publication;
 
 import app.uvsy.controllers.publication.payload.CreatePublicationPayload;
+import app.uvsy.controllers.publication.payload.UpdatePublicationPayload;
 import app.uvsy.response.PaginatedResponse;
 import app.uvsy.response.Response;
 import app.uvsy.service.PublicationService;
@@ -27,18 +28,13 @@ public class PublicationController {
         this.publicationService = publicationService;
     }
 
-    @Handler(method = HttpMethod.GET, resource = "/v1/publications/{id}")
-    public Response getPublication(@PathParameter(name = "id") String publicationId) {
-        return Response.of(publicationService.getPublication(publicationId));
-    }
-
     @Handler(method = HttpMethod.GET, resource = "/v1/publications")
     public PaginatedResponse getPublications(@QueryParameter(name = "programId", required = false) String programId,
                                              @QueryParameter(name = "limit", required = false) Integer limit,
                                              @QueryParameter(name = "offset", required = false) Integer offset,
                                              @QueryParameter(name = "tags", required = false) List<String> tags,
                                              @QueryParameter(name = "tagsOperator", required = false) String tagsOperator,
-                                             @QueryParameter(name = "sort", required = false) List<String> sortBy,
+                                             @QueryParameter(name = "sortBy", required = false) List<String> sortBy,
                                              @QueryParameter(name = "includeTags", required = false) Boolean includeTags,
                                              @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
         return PaginatedResponse.of(publicationService.getPublications(
@@ -64,4 +60,24 @@ public class PublicationController {
         );
     }
 
+    @Handler(method = HttpMethod.GET, resource = "/v1/publications/{id}")
+    public Response getPublication(@PathParameter(name = "id") String publicationId) {
+        return Response.of(publicationService.getPublication(publicationId));
+    }
+
+    @Handler(method = HttpMethod.PUT, resource = "/v1/publications/{id}")
+    public void updatePublication(@PathParameter(name = "id") String publicationId,
+                                  @BodyParameter UpdatePublicationPayload payload) {
+        publicationService.updatePublication(
+                publicationId,
+                payload.getTitle(),
+                payload.getDescription(),
+                payload.getTags()
+        );
+    }
+
+    @Handler(method = HttpMethod.DELETE, resource = "/v1/publications/{id}")
+    public void deletePublication(@PathParameter(name = "id") String publicationId) {
+        publicationService.deletePublication(publicationId);
+    }
 }
