@@ -108,7 +108,6 @@ public class PublicationService {
 
             TransactionManager.callInTransaction(conn, () -> {
                 publicationsDao.update(publicationDB);
-                removeTags(conn, publicationDB, tags);
                 insertTags(conn, publicationDB, tags);
                 return null;
             });
@@ -276,28 +275,6 @@ public class PublicationService {
         Set<TagDB> totalTags = new HashSet<>(existingTagDBS);
         totalTags.addAll(newTagDBS);
         return totalTags;
-    }
-
-    private void removeTags(ConnectionSource conn, PublicationDB publication, List<String> tags) throws SQLException {
-
-        // Create a set to avoid duplicates
-        HashSet<String> tagsSet = new HashSet<>(tags);
-
-        // Instantiate DAO
-        Dao<PublicationTagDB, String> publicationTagsDao = DaoManager.createDao(conn, PublicationTagDB.class);
-
-        // Fetch publications tags
-        List<PublicationTagDB> publicationTagDBS = publicationTagsDao.queryBuilder()
-                .where()
-                .eq(PublicationTagDB.PUBLICATION_ID_FIELD, publication.getId())
-                .query();
-
-        // Remove non-existing ones
-        publicationTagsDao.delete(
-                publicationTagDBS.stream()
-                        .filter(t -> !tagsSet.contains(t.getTag().getDescription()))
-                        .collect(Collectors.toList())
-        );
     }
 
     private QueryBuilder<PublicationTagDB, String> getTagQuery(ConnectionSource conn, List<String> tags) throws SQLException {
