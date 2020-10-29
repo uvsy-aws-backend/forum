@@ -6,9 +6,9 @@ import java.net.HttpURLConnection;
 
 public class RecordConflictException extends APIException {
 
-    public RecordConflictException() {
+    public RecordConflictException(String message) {
         super(
-                "Conflict with the specified record",
+                "Conflict with the specified record: " + message,
                 HttpURLConnection.HTTP_CONFLICT
         );
     }
