@@ -9,7 +9,6 @@ import org.github.serverless.api.annotations.parameters.BodyParameter;
 import org.github.serverless.api.annotations.parameters.PathParameter;
 import org.github.serverless.api.annotations.parameters.QueryParameter;
 
-import java.util.Optional;
 
 public class CommentVoteController {
 
