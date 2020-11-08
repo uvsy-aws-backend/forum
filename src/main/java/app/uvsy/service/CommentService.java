@@ -8,10 +8,13 @@ import app.uvsy.database.exceptions.DBException;
 import app.uvsy.environment.Environment;
 import app.uvsy.model.Comment;
 import app.uvsy.model.db.CommentDB;
+import app.uvsy.model.db.CommentVoteDB;
 import app.uvsy.model.db.PublicationDB;
 import app.uvsy.service.exceptions.RecordNotFoundException;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.misc.TransactionManager;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 
@@ -110,13 +113,22 @@ public class CommentService {
     public void deleteComment(String commentId) {
         try (ConnectionSource conn = DBConnection.create()) {
             Dao<CommentDB, String> commentsDao = DaoManager.createDao(conn, CommentDB.class);
-            commentsDao.deleteById(commentId);
+            Dao<CommentVoteDB, String> commentsVoteDao = DaoManager.createDao(conn, CommentVoteDB.class);
+
+            DeleteBuilder<CommentVoteDB, String> commentVoteDelete = commentsVoteDao.deleteBuilder();
+            commentVoteDelete.where().eq(CommentVoteDB.COMMENT_ID_FIELD, commentId);
+
+            TransactionManager.callInTransaction(conn, () -> {
+                        commentVoteDelete.delete();
+                        commentsDao.deleteById(commentId);
+                        return null;
+                    }
+            );
         } catch (SQLException | IOException e) {
             e.printStackTrace();
             throw new DBException(e);
         }
     }
-
 
 
     // Query

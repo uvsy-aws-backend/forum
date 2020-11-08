@@ -1,12 +1,10 @@
 package app.uvsy.model.db;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 
 @Data
@@ -38,4 +36,13 @@ public class PublicationDB {
 
     @DatabaseField(columnName = "updated_at", readOnly = true)
     private Timestamp updatedAt;
+
+
+    public void upvote() {
+        votes++;
+    }
+
+    public void downvote() {
+        if (votes > 0) votes--;
+    }
 }

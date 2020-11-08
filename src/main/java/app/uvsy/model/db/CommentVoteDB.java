@@ -3,30 +3,25 @@ package app.uvsy.model.db;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import lombok.Data;
+import lombok.ToString;
 
 import java.sql.Timestamp;
 
-
 @Data
-@DatabaseTable(tableName = "comment")
-public class CommentDB {
-
-    public static final String PUBLICATION_ID_FIELD = "publication_id";
+@ToString
+@DatabaseTable(tableName = "comment_vote")
+public class CommentVoteDB {
+    public static final String COMMENT_ID_FIELD = "comment_id";
+    public static final String USER_ID_FIELD = "user_id";
 
     @DatabaseField(columnName = "id", id = true, readOnly = true)
     private String id;
 
     @DatabaseField(columnName = "user_id")
-    private String userId;
+    private String user_id;
 
-    @DatabaseField(columnName = "publication_id")
-    private String publicationId;
-
-    @DatabaseField(columnName = "content")
-    private String content;
-
-    @DatabaseField(columnName = "votes")
-    private Integer votes;
+    @DatabaseField(columnName = "comment_id")
+    private String commentId;
 
     @DatabaseField(columnName = "created_at", readOnly = true)
     private Timestamp createdAt;
@@ -34,12 +29,11 @@ public class CommentDB {
     @DatabaseField(columnName = "updated_at", readOnly = true)
     private Timestamp updatedAt;
 
-
-    public void upvote() {
-        votes++;
+    public CommentVoteDB() {
     }
 
-    public void downvote() {
-        if (votes > 0) votes--;
+    public CommentVoteDB(String commentId, String user_id) {
+        this.user_id = user_id;
+        this.commentId = commentId;
     }
 }

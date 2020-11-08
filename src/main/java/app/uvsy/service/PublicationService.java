@@ -8,8 +8,10 @@ import app.uvsy.database.exceptions.DBException;
 import app.uvsy.environment.Environment;
 import app.uvsy.model.Publication;
 import app.uvsy.model.db.CommentDB;
+import app.uvsy.model.db.CommentVoteDB;
 import app.uvsy.model.db.PublicationDB;
 import app.uvsy.model.db.PublicationTagDB;
+import app.uvsy.model.db.PublicationVoteDB;
 import app.uvsy.model.db.TagDB;
 import app.uvsy.service.exceptions.RecordNotFoundException;
 import com.j256.ormlite.dao.Dao;
@@ -146,20 +148,36 @@ public class PublicationService {
     public void deletePublication(String publicationId) {
         try (ConnectionSource conn = DBConnection.create()) {
 
+            // DAOs
             Dao<PublicationDB, String> publicationsDao = DaoManager.createDao(conn, PublicationDB.class);
             Dao<PublicationTagDB, String> publicationTagDAO = DaoManager.createDao(conn, PublicationTagDB.class);
+            Dao<PublicationVoteDB, String> publicationVoteDAO = DaoManager.createDao(conn, PublicationVoteDB.class);
             Dao<CommentDB, String> commentsDao = DaoManager.createDao(conn, CommentDB.class);
+            Dao<CommentVoteDB, String> commentVoteDao = DaoManager.createDao(conn, CommentVoteDB.class);
 
-
-            DeleteBuilder<CommentDB, String> commentDelete = commentsDao.deleteBuilder();
-            commentDelete.where().eq(CommentDB.PUBLICATION_ID_FIELD, publicationId);
-
-
+            // Query Builders
             DeleteBuilder<PublicationTagDB, String> publicationTagDelete = publicationTagDAO.deleteBuilder();
             publicationTagDelete.where().eq(PublicationTagDB.PUBLICATION_ID_FIELD, publicationId);
 
+            DeleteBuilder<PublicationVoteDB, String> publicationVoteDelete = publicationVoteDAO.deleteBuilder();
+            publicationVoteDelete.where().eq(PublicationVoteDB.PUBLICATION_ID_FIELD, publicationId);
+
+            QueryBuilder<CommentDB, String> commentQuery = commentsDao.queryBuilder();
+            List<CommentDB> comments = commentQuery
+                    .where()
+                    .eq(CommentDB.PUBLICATION_ID_FIELD, publicationId)
+                    .query();
+
+            DeleteBuilder<CommentVoteDB, String> commentVoteDelete = commentVoteDao.deleteBuilder();
+            commentVoteDelete.where().in(
+                    CommentVoteDB.COMMENT_ID_FIELD,
+                    comments.stream().map(CommentDB::getId).collect(Collectors.toList())
+            );
+
+            // Transaction
             TransactionManager.callInTransaction(conn, () -> {
-                commentDelete.delete();
+                commentVoteDelete.delete();
+                commentsDao.delete(comments);
                 publicationTagDelete.delete();
                 publicationsDao.deleteById(publicationId);
                 return null; // Required by the interface
