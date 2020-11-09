@@ -12,6 +12,8 @@ import java.sql.Timestamp;
 public class PublicationDB {
 
     public static final String PROGRAM_ID_FIELD = "program_id";
+    public static final String VOTES_FIELD = "votes";
+    public static final String CREATED_AT_FIELD = "created_at";
 
     @DatabaseField(columnName = "id", id = true)
     private String id;

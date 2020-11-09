@@ -1,5 +1,6 @@
 package app.uvsy.service;
 
+import app.uvsy.aggregates.Sorting;
 import app.uvsy.apis.exceptions.APIClientException;
 import app.uvsy.apis.students.StudentsAPI;
 import app.uvsy.apis.students.model.UserAlias;
@@ -25,6 +26,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PublicationService {
+    private static final Map<String, String> SORT_FIELD_MAPPING = new HashMap<String, String>() {{
+        put("votes", PublicationDB.VOTES_FIELD);
+        put("creation", PublicationDB.CREATED_AT_FIELD);
+    }};
+
+    private final Sorting sorting;
+
+    public PublicationService() {
+        sorting = new Sorting(SORT_FIELD_MAPPING);
+    }
+
 
     public List<Publication> getPublications(String programId, Integer limit, Integer offset,
                                              List<String> tags, String tagOperator, List<String> sortBy,
@@ -206,7 +219,7 @@ public class PublicationService {
         if (offset > 0) publicationsQuery.offset(offset.longValue());
 
         // Sorting
-        sortBy.forEach((s -> publicationsQuery.orderBy(s, true)));
+        sorting.parse(sortBy).forEach(publicationsQuery::orderBy);
 
         return publicationsQuery;
     }
