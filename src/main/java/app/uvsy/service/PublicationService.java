@@ -181,15 +181,19 @@ public class PublicationService {
                     .eq(CommentDB.PUBLICATION_ID_FIELD, publicationId)
                     .query();
 
+
             DeleteBuilder<CommentVoteDB, String> commentVoteDelete = commentVoteDao.deleteBuilder();
-            commentVoteDelete.where().in(
-                    CommentVoteDB.COMMENT_ID_FIELD,
-                    comments.stream().map(CommentDB::getId).collect(Collectors.toList())
-            );
+
+            if (!comments.isEmpty()) {
+                commentVoteDelete.where().in(
+                        CommentVoteDB.COMMENT_ID_FIELD,
+                        comments.stream().map(CommentDB::getId).collect(Collectors.toList())
+                );
+            }
 
             // Transaction
             TransactionManager.callInTransaction(conn, () -> {
-                commentVoteDelete.delete();
+                if (!comments.isEmpty()) commentVoteDelete.delete();
                 commentsDao.delete(comments);
                 publicationTagDelete.delete();
                 publicationsDao.deleteById(publicationId);
