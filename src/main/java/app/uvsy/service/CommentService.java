@@ -55,9 +55,9 @@ public class CommentService {
                 }
 
                 if (!userId.isEmpty()) {
-                    Map<String, CommentVoteDB> commentVotes = getVotesForComments(conn, comments, userId);
+                    Map<String, String> commentVotes = getVotesForComments(conn, comments, userId);
                     comments.forEach(
-                            c -> c.setVote(commentVotes.getOrDefault(c.getId(), null))
+                            c -> c.setUserVoteId(commentVotes.getOrDefault(c.getId(), null))
                     );
                 }
 
@@ -165,7 +165,7 @@ public class CommentService {
         return commentQuery;
     }
 
-    private Map<String, CommentVoteDB> getVotesForComments(ConnectionSource conn, List<Comment> comments, String userId) throws SQLException {
+    private Map<String, String> getVotesForComments(ConnectionSource conn, List<Comment> comments, String userId) throws SQLException {
         return DaoManager.createDao(conn, CommentVoteDB.class)
                 .queryBuilder()
                 .where()
@@ -179,7 +179,7 @@ public class CommentService {
                 .stream()
                 .collect(Collectors.toMap(
                         CommentVoteDB::getCommentId,
-                        Function.identity(),
+                        CommentVoteDB::getId,
                         (x, y) -> x
                 ));
     }

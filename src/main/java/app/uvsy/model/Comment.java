@@ -5,12 +5,13 @@ import app.uvsy.model.db.CommentVoteDB;
 import app.uvsy.model.db.PublicationVoteDB;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.ToString;
 
 import java.sql.Timestamp;
 
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@ToString
 public class Comment {
 
     private String id;
@@ -21,7 +22,7 @@ public class Comment {
     private Integer votes;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-    private CommentVoteDB vote;
+    private String userVoteId;
 
 
     public static Comment from(CommentDB commentDB) {
