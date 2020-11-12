@@ -7,9 +7,11 @@ import app.uvsy.database.DBConnection;
 import app.uvsy.database.exceptions.DBException;
 import app.uvsy.environment.Environment;
 import app.uvsy.model.Comment;
+import app.uvsy.model.Publication;
 import app.uvsy.model.db.CommentDB;
 import app.uvsy.model.db.CommentVoteDB;
 import app.uvsy.model.db.PublicationDB;
+import app.uvsy.model.db.PublicationVoteDB;
 import app.uvsy.service.exceptions.RecordNotFoundException;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -24,13 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CommentService {
 
 
     public List<Comment> getComments(String publicationId, Integer limit, Integer offset,
-                                     List<String> sortBy, Boolean includeAlias) {
+                                     List<String> sortBy, Boolean includeAlias, String userId) {
         try (ConnectionSource conn = DBConnection.create()) {
 
             if (publicationExists(conn, publicationId)) {
@@ -50,6 +53,14 @@ public class CommentService {
                             .filter(p -> Objects.nonNull(p.getUserAlias()))
                             .collect(Collectors.toList());
                 }
+
+                if (!userId.isEmpty()) {
+                    Map<String, CommentVoteDB> commentVotes = getVotesForComments(conn, comments, userId);
+                    comments.forEach(
+                            c -> c.setVote(commentVotes.getOrDefault(c.getId(), null))
+                    );
+                }
+
                 return comments;
             } else {
                 throw new RecordNotFoundException(publicationId);
@@ -152,6 +163,25 @@ public class CommentService {
         // Sorting
         sortBy.forEach((s -> commentQuery.orderBy(s, true)));
         return commentQuery;
+    }
+
+    private Map<String, CommentVoteDB> getVotesForComments(ConnectionSource conn, List<Comment> comments, String userId) throws SQLException {
+        return DaoManager.createDao(conn, CommentVoteDB.class)
+                .queryBuilder()
+                .where()
+                .in(CommentVoteDB.COMMENT_ID_FIELD, comments
+                        .stream()
+                        .map(Comment::getId)
+                        .collect(Collectors.toList()))
+                .and()
+                .eq(CommentVoteDB.USER_ID_FIELD, userId)
+                .query()
+                .stream()
+                .collect(Collectors.toMap(
+                        CommentVoteDB::getCommentId,
+                        Function.identity(),
+                        (x, y) -> x
+                ));
     }
 
 

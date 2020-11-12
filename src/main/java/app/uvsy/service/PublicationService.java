@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PublicationService {
@@ -51,7 +52,9 @@ public class PublicationService {
 
     public List<Publication> getPublications(String programId, Integer limit, Integer offset,
                                              List<String> tags, String tagOperator, List<String> sortBy,
-                                             Boolean includeTags, Boolean includeAlias) {
+                                             Boolean includeTags,
+                                             Boolean includeAlias,
+                                             String userId) {
 
         List<Publication> publications;
         try (ConnectionSource conn = DBConnection.create()) {
@@ -82,6 +85,12 @@ public class PublicationService {
                 );
             }
 
+            if (!userId.isEmpty()) {
+                Map<String, PublicationVoteDB> publicationVotes = getVotesForPublications(conn, publications, userId);
+                publications.forEach(
+                        p -> p.setVote(publicationVotes.getOrDefault(p.getId(), null))
+                );
+            }
 
         } catch (SQLException | IOException e) {
             e.printStackTrace();
@@ -350,6 +359,25 @@ public class PublicationService {
                                 row -> (Long) row[1]
                         )
                 );
+    }
+
+    private Map<String, PublicationVoteDB> getVotesForPublications(ConnectionSource conn, List<Publication> publications, String userId) throws SQLException {
+        return DaoManager.createDao(conn, PublicationVoteDB.class)
+                .queryBuilder()
+                .where()
+                .in(PublicationVoteDB.PUBLICATION_ID_FIELD, publications
+                        .stream()
+                        .map(Publication::getId)
+                        .collect(Collectors.toList()))
+                .and()
+                .eq(PublicationVoteDB.USER_ID_FIELD, userId)
+                .query()
+                .stream()
+                .collect(Collectors.toMap(
+                        PublicationVoteDB::getPublicationId,
+                        Function.identity(),
+                        (x, y) -> x
+                ));
     }
 
     // Alias

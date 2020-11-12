@@ -18,7 +18,7 @@ public class PublicationVoteDB {
     private String id;
 
     @DatabaseField(columnName = "user_id")
-    private String user_id;
+    private String userId;
 
     @DatabaseField(columnName = "publication_id")
     private String publicationId;
@@ -32,8 +32,8 @@ public class PublicationVoteDB {
     public PublicationVoteDB() {
     }
 
-    public PublicationVoteDB(String publicationId, String user_id) {
-        this.user_id = user_id;
+    public PublicationVoteDB(String publicationId, String userId) {
+        this.userId = userId;
         this.publicationId = publicationId;
     }
 }

@@ -1,6 +1,7 @@
 package app.uvsy.model;
 
 import app.uvsy.model.db.PublicationDB;
+import app.uvsy.model.db.PublicationVoteDB;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +25,7 @@ public class Publication {
     private Long comments;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private PublicationVoteDB vote;
     private List<String> tags;
 
     public static Publication from(PublicationDB publicationDB) {

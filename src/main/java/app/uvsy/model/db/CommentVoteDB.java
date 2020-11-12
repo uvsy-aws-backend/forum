@@ -18,7 +18,7 @@ public class CommentVoteDB {
     private String id;
 
     @DatabaseField(columnName = "user_id")
-    private String user_id;
+    private String userId;
 
     @DatabaseField(columnName = "comment_id")
     private String commentId;
@@ -32,8 +32,8 @@ public class CommentVoteDB {
     public CommentVoteDB() {
     }
 
-    public CommentVoteDB(String commentId, String user_id) {
-        this.user_id = user_id;
+    public CommentVoteDB(String commentId, String userId) {
+        this.userId = userId;
         this.commentId = commentId;
     }
 }

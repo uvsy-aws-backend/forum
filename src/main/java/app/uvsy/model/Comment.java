@@ -1,6 +1,8 @@
 package app.uvsy.model;
 
 import app.uvsy.model.db.CommentDB;
+import app.uvsy.model.db.CommentVoteDB;
+import app.uvsy.model.db.PublicationVoteDB;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -19,6 +21,8 @@ public class Comment {
     private Integer votes;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private CommentVoteDB vote;
+
 
     public static Comment from(CommentDB commentDB) {
         Comment c = new Comment();
