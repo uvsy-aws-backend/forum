@@ -32,13 +32,15 @@ public class CommentController {
                                          @QueryParameter(name = "limit", required = false) Integer limit,
                                          @QueryParameter(name = "offset", required = false) Integer offset,
                                          @QueryParameter(name = "sort", required = false) List<String> sortBy,
-                                         @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
+                                         @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias,
+                                         @QueryParameter(name = "includeVoteForUserId", required = false) String userId) {
         return PaginatedResponse.of(commentService.getComments(
                 publicationId,
                 Optional.ofNullable(limit).orElse(10),
                 Optional.ofNullable(offset).orElse(0),
                 Optional.ofNullable(sortBy).orElse(Collections.emptyList()),
-                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE)
+                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE),
+                Optional.ofNullable(userId).orElse("")
         ));
     }
 

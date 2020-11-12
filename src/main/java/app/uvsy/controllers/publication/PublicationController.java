@@ -36,7 +36,8 @@ public class PublicationController {
                                              @QueryParameter(name = "tagsOperator", required = false) String tagsOperator,
                                              @QueryParameter(name = "sortBy", required = false) List<String> sortBy,
                                              @QueryParameter(name = "includeTags", required = false) Boolean includeTags,
-                                             @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias) {
+                                             @QueryParameter(name = "includeAlias", required = false) Boolean includeAlias,
+                                             @QueryParameter(name = "includeVoteForUserId", required = false) String userId) {
         return PaginatedResponse.of(publicationService.getPublications(
                 Optional.ofNullable(programId).orElse(""),
                 Optional.ofNullable(limit).orElse(10),
@@ -45,7 +46,8 @@ public class PublicationController {
                 Optional.ofNullable(tagsOperator).orElse("OR"),
                 Optional.ofNullable(sortBy).orElse(Collections.emptyList()),
                 Optional.ofNullable(includeTags).orElse(Boolean.FALSE),
-                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE)
+                Optional.ofNullable(includeAlias).orElse(Boolean.FALSE),
+                Optional.ofNullable(userId).orElse("")
         ));
     }
 
