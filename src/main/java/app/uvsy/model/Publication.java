@@ -3,6 +3,7 @@ package app.uvsy.model;
 import app.uvsy.model.db.PublicationDB;
 import app.uvsy.model.db.PublicationVoteDB;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,10 +11,8 @@ import lombok.ToString;
 import java.sql.Timestamp;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @ToString
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Publication {
     private String id;
     private String title;
@@ -25,7 +24,7 @@ public class Publication {
     private Long comments;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-    private PublicationVoteDB vote;
+    private String userVoteId;
     private List<String> tags;
 
     public static Publication from(PublicationDB publicationDB) {

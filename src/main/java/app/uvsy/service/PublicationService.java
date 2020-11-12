@@ -86,9 +86,9 @@ public class PublicationService {
             }
 
             if (!userId.isEmpty()) {
-                Map<String, PublicationVoteDB> publicationVotes = getVotesForPublications(conn, publications, userId);
+                Map<String, String> publicationVotes = getVotesForPublications(conn, publications, userId);
                 publications.forEach(
-                        p -> p.setVote(publicationVotes.getOrDefault(p.getId(), null))
+                        p -> p.setUserVoteId(publicationVotes.getOrDefault(p.getId(), null))
                 );
             }
 
@@ -361,7 +361,7 @@ public class PublicationService {
                 );
     }
 
-    private Map<String, PublicationVoteDB> getVotesForPublications(ConnectionSource conn, List<Publication> publications, String userId) throws SQLException {
+    private Map<String, String> getVotesForPublications(ConnectionSource conn, List<Publication> publications, String userId) throws SQLException {
         return DaoManager.createDao(conn, PublicationVoteDB.class)
                 .queryBuilder()
                 .where()
@@ -375,7 +375,7 @@ public class PublicationService {
                 .stream()
                 .collect(Collectors.toMap(
                         PublicationVoteDB::getPublicationId,
-                        Function.identity(),
+                        PublicationVoteDB::getId,
                         (x, y) -> x
                 ));
     }
