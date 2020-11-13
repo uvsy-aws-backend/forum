@@ -22,6 +22,7 @@ import com.j256.ormlite.support.ConnectionSource;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -166,6 +167,7 @@ public class CommentService {
     }
 
     private Map<String, String> getVotesForComments(ConnectionSource conn, List<Comment> comments, String userId) throws SQLException {
+        if (comments.isEmpty()) return Collections.emptyMap();
         return DaoManager.createDao(conn, CommentVoteDB.class)
                 .queryBuilder()
                 .where()
