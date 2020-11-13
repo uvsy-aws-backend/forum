@@ -26,6 +26,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -205,6 +206,7 @@ public class PublicationService {
                 if (!comments.isEmpty()) commentVoteDelete.delete();
                 commentsDao.delete(comments);
                 publicationTagDelete.delete();
+                publicationVoteDelete.delete();
                 publicationsDao.deleteById(publicationId);
                 return null; // Required by the interface
             });
@@ -362,6 +364,7 @@ public class PublicationService {
     }
 
     private Map<String, String> getVotesForPublications(ConnectionSource conn, List<Publication> publications, String userId) throws SQLException {
+        if (publications.isEmpty()) return Collections.emptyMap();
         return DaoManager.createDao(conn, PublicationVoteDB.class)
                 .queryBuilder()
                 .where()
