@@ -89,7 +89,7 @@ build: clean-build
 
 domain:
 	@echo "Creating domain for service"
-	@npx serverless create_domain
+	@npx serverless create_domain --stage $(STAGE)
 
 deploy: build
 	@echo "Deploying to '$(STAGE)' with profile '$(AWS_PROFILE)'..."
