@@ -68,6 +68,9 @@ dependencies {
     // Http
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpComponentsVersion
 
+    // Email
+    compile group: 'javax.mail', name: 'mail', version: '1.4.7'
+
 }
 
 task ssm {

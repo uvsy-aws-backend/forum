@@ -20,6 +20,7 @@ public class Comment {
     private String publicationId;
     private String content;
     private Integer votes;
+    private Boolean reported;
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private String userVoteId;
@@ -32,6 +33,7 @@ public class Comment {
         c.setUserId(commentDB.getUserId());
         c.setContent(commentDB.getContent());
         c.setVotes(commentDB.getVotes());
+        c.setReported(commentDB.getReported());
         c.setCreatedAt(commentDB.getCreatedAt());
         c.setUpdatedAt(commentDB.getUpdatedAt());
         return c;

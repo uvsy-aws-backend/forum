@@ -21,6 +21,7 @@ public class Publication {
     private String userAlias;
     private String programId;
     private Integer votes;
+    private Boolean reported;
     private Long comments;
     private Timestamp createdAt;
     private Timestamp updatedAt;
@@ -35,6 +36,7 @@ public class Publication {
         p.setUserId(publicationDB.getUserId());
         p.setProgramId(publicationDB.getProgramId());
         p.setVotes(publicationDB.getVotes());
+        p.setReported(publicationDB.getReported());
         p.setCreatedAt(publicationDB.getCreatedAt());
         p.setUpdatedAt(publicationDB.getUpdatedAt());
         return p;

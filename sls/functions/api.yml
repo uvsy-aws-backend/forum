@@ -9,6 +9,9 @@ api:
     DB_HOST: ${self:custom.dbHost}
     DB_USERNAME: ${self:custom.dbUser}
     DB_PASSWORD: ${self:custom.dbPassword}
+    REPORT_EMAIL_USERNAME: ${self:custom.email.username}
+    REPORT_EMAIL_PASSWORD: ${self:custom.email.password}
+    REPORT_EMAIL_RECIPIENTS: ${self:custom.email.recipients}
   events:
     # Publications
     - http:
@@ -77,4 +80,12 @@ api:
     - http:
         path: /v1/votes/comments/{id}
         method: DELETE
+        cors: true
+    - http:
+        path: /v1/reports/publication
+        method: POST
+        cors: true
+    - http:
+        path: /v1/reports/comment
+        method: POST
         cors: true

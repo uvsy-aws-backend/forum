@@ -5,6 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 
 
 @Data
@@ -28,12 +29,18 @@ public class CommentDB {
     @DatabaseField(columnName = "votes")
     private Integer votes;
 
+    @DatabaseField(columnName = "reported")
+    private Boolean reported;
+
     @DatabaseField(columnName = "created_at", readOnly = true)
     private Timestamp createdAt;
 
     @DatabaseField(columnName = "updated_at", readOnly = true)
     private Timestamp updatedAt;
 
+    public boolean isReported() {
+        return Optional.ofNullable(reported).orElse(Boolean.FALSE);
+    }
 
     public void upvote() {
         votes++;
