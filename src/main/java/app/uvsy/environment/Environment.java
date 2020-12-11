@@ -51,8 +51,22 @@ public class Environment {
         return getString("STAGE");
     }
 
+    public static String getReportEmailUsername() {
+        return getString("REPORT_EMAIL_USERNAME");
+    }
+
+    public static String getReportEmailPassword() {
+        return getString("REPORT_EMAIL_PASSWORD");
+    }
+
+    public static String getReportEmailRecipients() {
+        return getString("REPORT_EMAIL_RECIPIENTS");
+    }
+
     private static String getString(String variableName) {
         return Optional.ofNullable(System.getenv(variableName))
                 .orElseThrow(() -> new CorruptEnvironmentException(variableName));
     }
+
+
 }

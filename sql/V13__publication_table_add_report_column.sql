@@ -1,0 +1,2 @@
+ALTER TABLE publication
+ADD COLUMN reported BOOLEAN DEFAULT FALSE;

@@ -9,6 +9,7 @@
     "java-invoke-local": "^0.0.6",
     "serverless-domain-manager": "^4.1.1",
     "serverless-offline": "^6.4.0",
+    "serverless-plugin-warmup": "^4.9.0",
     "serverless-prune-plugin": "^1.4.3"
   }
 }

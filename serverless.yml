@@ -13,6 +13,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "dynamodb:*"
+        - "lambda:InvokeFunction"
       Resource: "*"
   environment:
     STAGE: ${self:provider.stage}
@@ -20,6 +21,7 @@ provider:
 plugins:
   - serverless-offline
   - serverless-domain-manager
+  - serverless-plugin-warmup
   - serverless-prune-plugin
 
 package:
@@ -27,6 +29,16 @@ package:
 
 
 custom:
+
+  warmup:
+    cleanFolder: true
+    memorySize: 256
+    prewarm: true
+    enabled: true
+    timeout: 30
+    name: ${self:provider.stage}-forum-warmup-plugin
+    events:
+      - schedule: 'cron(0/5 18-00 ? * MON-FRI *)'
 
   # Domain name configuration
   customDomain:
@@ -51,6 +63,12 @@ custom:
   prune:
     automatic: true
     number: 3
+
+  # Emails
+  email:
+    username: ${ssm:/${self:provider.stage}/forum/email/username~true}
+    password: ${ssm:/${self:provider.stage}/forum/email/password~true}
+    recipients: ${ssm:/${self:provider.stage}/forum/email/recipients~true}
 
 functions:
   - ${file(./sls/functions/api.yml)}
