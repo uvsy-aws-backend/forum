@@ -157,6 +157,7 @@ public class PublicationService {
             publication.setProgramId(programId);
             publication.setUserId(userId);
             publication.setVotes(0);
+            publication.setReported(Boolean.FALSE);
             publicationsDao.create(publication);
 
             if (!tags.isEmpty()) {

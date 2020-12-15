@@ -84,6 +84,7 @@ public class CommentService {
                 commentDB.setUserId(userId);
                 commentDB.setContent(content);
                 commentDB.setVotes(0);
+                commentDB.setReported(Boolean.FALSE);
                 commentDao.create(commentDB);
             } else {
                 throw new RecordNotFoundException(publicationId);
